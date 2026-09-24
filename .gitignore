@@ -8,3 +8,4 @@ keystore/
 build/
 local.properties
 .gradle/
+.kotlin/
