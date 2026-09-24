@@ -1,56 +1,75 @@
-# Workspace OS Android 0.4.0
+# Workspace OS NEXUS Mobile
 
-Workspace OS 的原生安卓客户端。通过 SMB 直连 NAS，适用于局域网或 ZeroTier 网络。
+Workspace OS 2.0 的原生安卓客户端（Kotlin + Jetpack Compose）。通过 SMB2/3 直连 NAS，适用于局域网或 ZeroTier 虚拟网络；深色 NEXUS 科技风界面，与 Windows/macOS 控制中心及网页看板同一套设计语言。
 
-## 0.3.2 已实现
+当前版本：**v0.5.4**（minSdk 26 / targetSdk 35）
 
-- 参考网页版和 Windows NEXUS 控制中心的深色科技风界面、渐变背景、六边形 NEXUS 标志、圆角卡片和状态颜色。
-- NAS 地址、共享名、用户名和密码配置；密码使用 Android Keystore + AES-GCM 加密保存。
-- NAS 文件夹浏览、路径导航、当前目录搜索、全选与多选。
-- NAS 文件或文件夹向左滑动显示删除按钮；确认后可递归删除文件夹，并再次检查 NAS 是否仍存在目标。
-- 左滑删除层支持“取消”、右滑收回和 4.5 秒自动收回；触发距离提高到 40%，滑动本身不会执行删除。
-- 修复文件卡片半透明导致未左滑时“取消/删除”按钮透出的问题；操作层现在只在卡片左移后可见。
-- 从安卓系统文件选择器选择一个或多个手机文件，上传到当前 NAS 目录。
-- 在手机端创建 NAS 文件夹，并在创建后重新读取目录确认结果。
-- 新增“手机文件”页面：通过安卓目录授权浏览手机目录、逐级打开、搜索、全选和多选。
-- 手机页面支持新建文件夹、左滑删除、批量删除，以及将文件或整个文件夹复制到另一个手机目录。
-- 手机文件或文件夹可递归上传到当前 NAS 目录；空文件夹与原有子目录结构会保留。
-- 勾选 NAS 文件或文件夹后同步到手机；文件夹会递归收集为一个聚合任务。
-- 下载保存到系统 `下载/WorkspaceOS`，保留 NAS 子目录结构。
-- 上传和下载均使用临时文件、断点续传、完成后提交和文件大小校验。
-- 后台任务中心只显示一个聚合任务，包含当前文件、文件数量、字节数和百分比；成功任务 10 秒后自动清除，失败任务可手动清除。
-- NAS 与手机存储总量、可用容量和占用比例显示。
-- Android 8.0+ 支持，Android Lint 全部通过。
-- 上传/下载完成后，自动追加 NAS Obsidian 日志；NAS 日志作为多设备权威记录源。
+## 功能
 
-## 使用方法
+### NAS 文件管理
+- NAS 连接档：多个 NAS 配置随意切换，每个连接的密码用 Android Keystore (AES-GCM) 独立加密保存
+- 目录浏览、当前目录搜索、名称/大小/时间排序（目录恒置顶，选择持久化）
+- 上传手机文件、新建文件夹、重命名；文件或文件夹左滑删除（含二次确认与递归删除核验）
+- 小文件（≤64 MB）应用内预览：图片双指缩放、Markdown 渲染、文本直读；其他格式跳转系统应用
+- 同步到手机：断点续传、大小校验、原子提交；完成后出现在「最近同步」卡片，一键打开
+- 下载目录可自定义：系统目录选择器授权任意文件夹，镜像 NAS 目录层级写入
+- 传输日志自动追加到 NAS 的 `09_System/SystemLog/WorkspaceOS/`，与桌面版 Workspace OS 同一记录体系
 
-1. 确保手机能访问 NAS 的 SMB 端口。异地访问时先连接 ZeroTier。
-2. 打开 Workspace OS，填写 NAS 地址（例如 `192.168.1.9`）、共享名 `Workspace`、用户名和密码。
-3. 点“连接 Workspace NAS”。连接成功后配置会保存在手机应用私有空间。
-4. “上传文件”：从手机选择多个文件并上传到当前 NAS 目录。
-5. “新建文件夹”：在当前 NAS 目录创建文件夹。
-6. 勾选 NAS 文件或文件夹后点“同步到手机”，文件会保存到 `下载/WorkspaceOS`。
-7. 切换到“手机文件”，点“选择手机目录”完成授权，即可直接浏览和管理该目录。
-8. 勾选手机文件或文件夹后，可选择“复制到…”、“上传 NAS”或“删除”。
-9. 在任意 NAS/手机项目上向左滑动，可显示单项删除按钮；删除前必须再次确认。
+### 手机文件管理
+- 系统目录授权（SAF）后浏览、搜索、新建、重命名、创建副本、左滑删除
+- 文件/文件夹复制到另一手机目录，或递归上传到 NAS，保留子目录结构
 
-## 构建环境
+### 传输体验
+- 后台任务中心：聚合进度、字节数、百分比，支持中途取消
+- 慢速 NAS 下界面不阻塞；连接状态自动降级与友好错误提示（登录失败/超时/找不到共享等）
 
-- Android Studio 2026.1.3.7
-- Microsoft OpenJDK 17.0.20
-- Gradle 8.7
-- Android SDK Platform 35
-- Android SDK Build Tools 36.0.0
+## 构建
+
+环境：JDK 17、Android SDK Platform 35、Build Tools 36、Gradle 8.7（wrapper 自带）。
 
 ```powershell
+# 调试包
 ./gradlew.bat :app:lintDebug :app:assembleDebug
+
+# 正式签名包（需要本地签名配置，见下）
+./gradlew.bat :app:assembleRelease
 ```
 
-调试 APK：`app/build/outputs/apk/debug/app-debug.apk`
+构建产物：`app/build/outputs/apk/...`（已被 .gitignore 排除）。
 
-## 后续增强
+### 正式版签名（每台构建机本地准备，不进仓库）
 
-- WorkManager/前台服务支持进程重启后的长任务恢复与通知栏进度。
-- 手机本地目录和 NAS 目录双栏差异比较、双向规则同步与冲突策略。
-- 正式签名 APK/AAB、自动更新和发布渠道。
+在 `android/` 下创建 `keystore.properties`（已被 .gitignore 排除）：
+
+```properties
+storeFile=../keystore/workspaceos-release.keystore
+storePassword=你的密钥库口令
+keyAlias=workspaceos
+keyPassword=你的密钥口令
+```
+
+并把密钥库文件放到 `android/keystore/`。缺少该文件时 Release 构建自动回退为无签名，Debug 构建不受影响。
+
+## 技术栈
+
+- Kotlin 2.0.21、Jetpack Compose (Material 3)、单 Activity 架构 + ViewModel/StateFlow
+- [smbj](https://github.com/hierynomus/smbj) 0.13.0（纯 Java SMB2/3 客户端）
+- DocumentFile + DocumentsContract（SAF 手机文件访问，单次批量查询）
+- R8 压缩（Release），smbj/BouncyCastle 反射保留规则见 `app/proguard-rules.pro`
+
+## 源码结构
+
+```
+app/src/main/java/com/workspaceos/mobile/
+  MainActivity.kt          # 全部 Compose 界面（深色 NEXUS 主题）
+  WorkspaceViewModel.kt    # UI 状态、任务编排、预览与打开
+  SmbRepository.kt         # SMB 浏览/上传/下载/重命名/日志
+  LocalFileRepository.kt   # 手机目录浏览/复制/删除/副本
+  SecureSettings.kt        # 多连接档与 Keystore 加密存储
+```
+
+## 后续计划
+
+- WorkManager 前台服务：进程重启后的长任务恢复与通知栏进度
+- NAS/手机双栏差异比较与冲突策略
+- 应用商店发布渠道与自动更新
