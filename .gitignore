@@ -1,0 +1,10 @@
+# 签名密钥与口令（仅本机，勿提交）
+keystore.properties
+keystore/
+*.keystore
+*.jks
+
+# 构建产物
+build/
+local.properties
+.gradle/
